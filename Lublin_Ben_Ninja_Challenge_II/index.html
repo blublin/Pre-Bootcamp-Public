@@ -1,0 +1,91 @@
+<!--
+Pre-Bootcamp Ninja Game II Challenge
+Ben Lublin
+Mar 4, 2022
+
+Using pre-built index.html file
+Changes: Instead of 0-500, using active window space with a border of 50px
+---
+Part II
+Added variables to represent direction with every arrow key press
+Added alternating numbers concatenate with the ninja image
+-->
+<html>
+<body>
+	<div id="background" style="width: 900px; height: 750px; background-image: url('img/white_bg.jpg');">
+        <!-- Ninja Character -->
+        <div id='character' style=
+            'position:absolute;
+            top:100px;
+            left:450px;
+            background-image: url("img/down1.png");
+            width:59px; height:86px;'>
+        </div>
+    </div>
+    <script type="text/javascript">
+	    var leftValue = 450, // x value
+            topValue = 100,  // y value
+            posChange = 10,  // constant for positive increment
+            negChange = -10, // constant for negative increment
+            bgDirection = "down", // default image
+            bgNum = 1; // default image variant
+
+
+    	function update(){
+    		document.getElementById("character").style.left = leftValue+"px";
+    		document.getElementById("character").style.top = topValue+"px";
+            // Alternate bgNum to simulate walking
+            if (bgNum == 1) {
+                bgNum = 2;
+            }
+            else {
+                bgNum = 1;
+            }
+            document.getElementById("character").style.backgroundImage = "url('img/"+bgDirection+bgNum+".png')";
+    	}
+
+        // Keep left value (left/right) within window space of + or - 50
+        function updateLeft(lv){
+            newLeft = leftValue + lv;
+            if (newLeft > 50 && newLeft < (window.innerWidth-50)) {
+                return newLeft;
+            }
+            else {
+                return leftValue;
+            }
+        }
+
+        // Keep top value (up/down) within window space of + or - 50
+        function updateTop(tv){
+            newTop = topValue + tv
+            if (newTop > 50 && newTop < (window.innerHeight-50)) {
+                return newTop;
+            }
+            else {
+                return topValue;
+            }
+        }
+
+    	document.onkeydown = function(e){
+    		console.log(e);                   // Show event (button press) information
+    		if(e.keyCode == 37) {             // LEFT
+    			leftValue = updateLeft(negChange);
+                bgDirection = "left"
+    		}
+    		else if (e.keyCode == 39) {       // RIGHT
+    			leftValue = updateLeft(posChange);
+                bgDirection = "right"        		
+    		}
+            else if (e.keyCode == 38) {       // TOP
+                topValue = updateTop(negChange);
+                bgDirection = "top"
+            }
+    		else if (e.keyCode == 40) {       // DOWN
+				topValue = updateTop(posChange);
+            bgDirection = "down"
+    		}
+    		update();
+    	}
+    </script>
+</body>
+</html>
