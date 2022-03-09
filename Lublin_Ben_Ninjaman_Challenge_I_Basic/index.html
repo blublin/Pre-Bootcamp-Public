@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>NinjaMan - So stealthy!</title>
+    <style type="text/css">
+        
+        * {     /* Default settings for all */
+            margin: 0;
+            padding: 0;
+        }
+        .row {
+            line-height: 0;
+        }
+        .wall {
+            background-color: blue;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+        }
+        .sushi {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+            background-image: url('imgs/sushi.png');
+            background-size: contain;
+        }
+        .onigiri {
+            background-image: url('imgs/onigiri.png');
+        }
+        .blank {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+        }
+        .score {
+            background color: white;
+            height: 40px;
+            width: 200px;
+            text-align: center;
+
+        }
+        #ninjaman {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+            background-image: url('imgs/ninja.gif');
+            background-size: contain;
+            position: absolute;
+            /*left: 40px;
+            top: 40px;*/
+        }
+    </style>
+</head>
+
+<body>
+    <div id="world"></div>
+    <div id="ninjaman"></div>
+</body>
+
+<script type="text/javascript">
+    // Create the world from functions and scalability instead of hardcoded html
+
+    // 2D array representing x,y grid for 'map'
+    var world = [
+        [1,1,1,1,1],
+        [1,0,2,2,1],
+        [1,2,1,2,1],
+        [1,2,2,2,1],
+        [1,2,2,2,1],
+        [1,2,1,2,1],
+        [1,2,2,2,1],
+        [1,2,2,2,1],
+        [1,2,1,2,1],
+        [1,2,2,2,1],
+        [1,1,1,1,1]
+        ]
+
+        // dictionary lookup to 
+    var worldDict = {
+        0: 'blank',
+        1: 'wall',
+        2: 'sushi',
+        3: 'sushi onigiri'
+    }
+
+    var ninjaman = {
+        // x,y values based on grid positions
+        x: 1,
+        y: 1
+    }
+
+    // global variable so score div has access
+    var cols;
+    var score = 0;
+
+    function genRandomNum(min, max) {
+        // Generate a random number between min(included)/max(excluded)
+        return Math.floor(Math.random()*(max - min))+min;
+    }
+
+    function generateWorld() {
+        // Create randomized world and fill with random dictionary elements.
+        var min = 8, max = 20;
+        var rows = genRandomNum(min, max);
+        cols = genRandomNum(min, max);
+        for (var i = 0; i<rows; i++) {
+            // Fill world with walls
+            var arr = new Array(cols).fill(1);
+            world[i] = arr;
+        }
+    }
+
+    function createPath() {
+        // pick starting point
+        var randomStartPoint = [genRandomNum(1, world.length-2), genRandomNum(1, cols-2)];
+        var currentPoint = randomStartPoint;
+        var nextDirection, nextLocation;
+        var directions = [
+        [1,0],      // down
+        [-1,0],     // up
+        [0,1],      // right
+        [0,-1]      // left
+        ]
+        var totalSize = world.length*cols;
+        // pick up to 75% of 'map' to be useable
+        var maxUsable = Math.round(genRandomNum(totalSize*0.4, totalSize*0.75));
+        var used = 1;
+
+        //set starting point to be blank
+        world[currentPoint[0]][currentPoint[1]] = 0;
+        // main loop to create path
+        while (used <= maxUsable) {
+            // change blocks from walls to food
+            // pick a random direction from directions array
+            nextDirection = genRandomNum(0, directions.length);
+            // map nextDirection onto currentPoint
+            nextLocation = currentPoint.map( (x, i) => (x + nextDirection[i]) );
+
+            // check location is valid, inside world
+            if (nextLocation[0] >= 0 && nextLocation[0] < world.length &&
+                nextLocation[1] >= 0 && nextLocation[1] < cols) {
+                // set next location to be a sushi or onigiri
+                replacement = genRandomNum(2,4);
+                world[nextLocation[0]][nextLocation[1]] = replacement;
+                // Set new current point
+                currentPoint = nextLocation;
+                used++;
+
+                // For debugging
+                console.log("Set grid [" + currentPoint[0] + "][" + currentPoint[1] + "] to " + worldDict[replacement]);
+            }
+        }
+    }
+    // createPath();
+
+    function checkNearbyGrid(i,j) {
+        var validNums = [2,3];
+        if ( (validNums.includes(world[i][j])) &&    // Is current grid location a sushi or onigiri &&
+            (validNums.includes(world[i-1][j]) ||    // ( Is location above sushi or onigiri
+            validNums.includes(world[i+1][j]) ||     // location below
+            validNums.includes(world[i][j-1]) ||     // location left
+            validNums.includes(world[i][j=1]) ) ) {
+            return true;
+            }  // location right )
+        else {
+            return false;
+        }
+    }
+
+    function randomlyAddOnigiri() {
+        // Replace some of the Sushi with Onigiri
+        for (var row=0; row<world.length; row++) {
+            for (var val=0; val<world[row].length; val++) {
+                if ((world[row][val] == 2) && (Math.floor(Math.random() * 10) > 7)) {
+                    world[row][val] = 3;
+                }
+            }
+        }
+    }
+    randomlyAddOnigiri()
+
+    function drawWorld() {
+        // Create world data by filling with data from worldDict based on the 2D array (hardcoded or randomized).
+        object = "";
+
+        for (var row=0; row<world.length; row++) {
+            object += "<div class = 'row'>";
+            // console.log(world[row]); // For Testing
+
+            for (var val=0; val<world[row].length; val++) {
+                object += "<div class = '"+worldDict[world[row][val]]+"'></div>";
+            }
+            object += "</div>";
+        }
+        object += "<div class = 'score'>Score :: " + score + "</div>";
+        document.getElementById('world').innerHTML = object;
+    }
+    drawWorld();
+
+    function drawNinjaman() {
+        // Set ninjaman position on the document.
+        document.getElementById('ninjaman').style.left = ninjaman.x * 40 + 'px';
+        document.getElementById('ninjaman').style.top = ninjaman.y * 40 + 'px';
+    }
+    drawNinjaman();
+
+    document.onkeydown = function(e) {
+        // console.log(e) / For testing
+        // Update ninjaman x / y positions when arrow keys are pressed
+        switch (e.keyCode) {
+            case 37:
+                if (world[ninjaman.y][ninjaman.x - 1] != 1) {
+                    ninjaman.x--;
+                }
+                break;
+            case 39:
+                if (world[ninjaman.y][ninjaman.x + 1] != 1) {
+                    ninjaman.x++;
+                }
+                break;
+            case 38:
+                if (world[ninjaman.y - 1][ninjaman.x] != 1) {
+                    ninjaman.y--;
+                }
+                break;
+            case 40:
+                if (world[ninjaman.y + 1][ninjaman.x] != 1) {
+                    ninjaman.y++;
+                }
+                break;
+        }
+        if (world[ninjaman.y][ninjaman.x] == 2) {
+            score += 10;
+        }
+        else if (world[ninjaman.y][ninjaman.x] == 3) {
+            score += 5;
+        }
+        world[ninjaman.y][ninjaman.x] = 0; // Set space to blank (sushi eaten)
+        drawNinjaman() // update Ninjaman
+        drawWorld() // update world map
+    }
+
+    // If world has no sushi left, game over
+
+    // advanced challenge: random world
+
+    // Hacker challenge - create ghosts
+    // 3 lives, game over if hit 3 times
+
+
+</script>
+</html>
