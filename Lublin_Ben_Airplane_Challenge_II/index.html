@@ -1,0 +1,232 @@
+<!--
+Coding Dojo Pre-bootcamp
+March 14, 2022
+Ben Lublin
+
+Airplane Challenge 2
+All bonus challenges met:
+* Added a game loop
+* Enemies move downwards during game loop
+* Created array to hold a dictionary of player missiles
+* Player can shoot missiles by hitting space bar
+* Missiles travel upwards
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Space Pilot Game!</title>
+</head>
+<body>
+<!-- ------------CSS------------ -->
+	<style type="text/css">
+		#space_background {
+			background-image: url("space_background.jpg");
+			width: 900px;
+			height: 700px;
+		}
+		.player {
+			position: absolute;
+			background-image: url("player_kestrel.png");
+			width: 70px;
+			height: 75px;
+		}
+		.enemy {
+			position: absolute;
+			background-image: url("enemy_hurricane.png");
+			width: 70px;
+			height: 75px;
+		}
+		.missile {
+			position: absolute;
+			background-color: red;
+			width: 2px;
+			height: 10px;
+		}
+
+	</style>
+<!-- ------------HTML------------ -->
+	<div id="space_background">
+		<div id="players"></div>
+		<div id="enemies"></div>
+		<div id="missiles"></div>
+	</div>
+
+<!-- ------------JAVASCRIPT------------ -->
+	<script type="text/javascript">
+		var debug = false;
+
+		// Player position dictionary
+		var player = {
+			left: 450,
+			top: 620
+		}
+
+		var totalEnemies = 6;
+
+		// Array of enemy positions
+		var enemyLeft = 100;
+		var enemyTop = 100;
+		var enemies = [];
+			// {left:350, top:200},
+			// {left:450, top:250}
+
+		var missiles = [];
+
+		initiateEnemies()
+
+		// Get values to define border
+		var ocean_obj = document.getElementById("space_background");
+		var ocean_style = window.getComputedStyle(ocean_obj);
+		var gameHeight = parseInt(ocean_style.getPropertyValue("height")) - 75; // Set bottom boundary
+		var gameWidth = parseInt(ocean_style.getPropertyValue("width")) - 60; // set right boundary
+
+		drawPlayer();
+
+		drawEnemies()
+
+		// runs indefinitely until cancel interval is called
+		var enemyLoop = setInterval(updateEnemies, 50);
+		// var missileLoop = setInterval(moveMissiles, 50);
+
+		function drawPlayer() {
+			content = "<div class='player' style='left:"+player.left+"px; top:"+player.top+"px'></div>";
+			document.getElementById("players").innerHTML = content;
+		}
+
+		function initiateEnemies() {
+			// Fill enemies array
+			for (var i = 0; i < totalEnemies; i++) {
+				// stagger enemies up and down by 25px
+				switch (enemyTop) {
+					case 100:
+						enemies[i] = {left: enemyLeft, top: enemyTop};
+						enemyTop += 25;
+						enemyLeft += 80;
+						break;
+					case 125:
+						enemies[i] = {left: enemyLeft, top: enemyTop};
+						enemyTop -= 25;
+						enemyLeft += 80;
+						break;
+				}
+			}
+		}
+
+		function drawEnemies() {
+			// Put enemies on screen
+			content = "";
+			for (var arr of enemies) {
+				content += "<div class='enemy' style='left:"+arr.left+"px; top:"+arr.top+"px'></div>";
+				if (debug) {
+					console.log("Left:", arr);
+					console.log("Top:", top);
+				}
+			}
+			if (debug) {
+				console.log("Content:", content);
+			}
+			document.getElementById("enemies").innerHTML = content;
+		}
+
+		function updateEnemies() {
+			// move enemies down a little at a time
+			for (var arr of enemies) {
+				if (arr.top < gameHeight) {
+					arr.top++;
+				}
+				else {
+					clearInterval(enemyLoop);
+				}
+			}
+			drawEnemies();
+		}
+
+		function drawMissiles() {
+			content = "";
+			for (var missile of missiles) {
+				if (missile) {
+				content += "<div class='missile' style='left:"+missile.left+"px; top:"+missile.top+"px'></div>";
+			}
+			// else {
+			// 	content = "";
+			// }
+			}
+			document.getElementById("missiles").innerHTML = content;
+		}
+
+		function moveMissiles() {
+			for (var i = 0; i < missiles.length; i++) {
+				if (missiles[i].top > 0) {
+					missiles[i].top -= 2;
+				}
+				else {
+					// delete missiles[i]; // delete value at index, but keep index
+					missiles.splice(i,1);
+				}
+			}
+			drawMissiles();
+			setTimeout(moveMissiles, 100);
+		}
+
+		document.onkeydown = function(e) {
+			if (debug) {
+				console.log(e);
+			}
+	        switch (e.keyCode) {
+	        	case 32: 			// fire missile
+	        		missiles.push( {left: (player.left+34), top: (player.top-8)} ); // Create a 'missile' from the tip of the ship
+	        		drawMissiles();
+	        		setTimeout(moveMissiles, 100);
+	        		break;
+	            case 37: 			// left
+	            	if (debug) {
+	            		console.log("left");
+	            	}
+	                if (player.left > 0) {
+	                	if (debug) {
+	                		console.log("left confirmed");
+	                	}
+	                    player.left -= 10;
+	                }
+	                break;
+	            case 39: 			// right
+	            	if (debug) {
+	            		console.log('right');
+	            	}
+	                if (player.left < gameWidth) {
+	                	if (debug) {
+	                		console.log('right confirmed');
+	                	}
+	                    player.left += 10;
+	                }
+	                break;
+	            case 38: 			// up
+	            	if (debug) {
+	            		console.log('up');
+	            	}
+	                if (player.top > ( gameHeight * (3/4) ) ) { // Utilizing bottom 1/4 of the area
+	                	if (debug) {
+	                		console.log('top confirmed');
+	                	}
+	                    player.top -= 10;
+	                }
+	                break;
+	            case 40: 			// down
+	            	if (debug) {
+	            		console.log('down');
+	            	}
+	                if (player.top < gameHeight) {
+	                	if (debug) {
+	                		console.log('down confirmed');
+	                	}
+						player.top += 10;
+	                }
+	                break;
+        	}
+        	drawPlayer() 
+		}
+
+	</script>
+</body>
+</html>
