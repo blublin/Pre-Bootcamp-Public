@@ -39,7 +39,7 @@ All bonus challenges met:
 		}
 		.missile {
 			position: absolute;
-			background-color: red;
+			background-color: yellow;
 			width: 2px;
 			height: 10px;
 		}
@@ -86,7 +86,7 @@ All bonus challenges met:
 		drawEnemies()
 
 		// runs indefinitely until cancel interval is called
-		var enemyLoop = setInterval(updateEnemies, 50);
+		var enemyLoop = setInterval(updateEnemies, 30);
 		// var missileLoop = setInterval(moveMissiles, 50);
 
 		function drawPlayer() {
@@ -158,7 +158,7 @@ All bonus challenges met:
 		function moveMissiles() {
 			for (var i = 0; i < missiles.length; i++) {
 				if (missiles[i].top > 0) {
-					missiles[i].top -= 2;
+					missiles[i].top -= 1;
 				}
 				else {
 					// delete missiles[i]; // delete value at index, but keep index
@@ -166,7 +166,7 @@ All bonus challenges met:
 				}
 			}
 			drawMissiles();
-			setTimeout(moveMissiles, 100);
+			setTimeout(moveMissiles, 40);
 		}
 
 		document.onkeydown = function(e) {
@@ -177,7 +177,7 @@ All bonus challenges met:
 	        	case 32: 			// fire missile
 	        		missiles.push( {left: (player.left+34), top: (player.top-8)} ); // Create a 'missile' from the tip of the ship
 	        		drawMissiles();
-	        		setTimeout(moveMissiles, 100);
+	        		setTimeout(moveMissiles, 40);
 	        		break;
 	            case 37: 			// left
 	            	if (debug) {
